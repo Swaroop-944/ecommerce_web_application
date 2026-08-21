@@ -1,0 +1,13 @@
+{
+  "name": "ecommerce-web-application",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -k -n backend,frontend,admin -c blue,green,magenta \"npm --prefix backend run dev\" \"npm --prefix frontend run dev -- --host 0.0.0.0 --port 5173\" \"npm --prefix admin run dev -- --host 0.0.0.0 --port 5174\"",
+    "build": "npm --prefix frontend run build && npm --prefix admin run build",
+    "seed": "npm --prefix backend run seed"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
