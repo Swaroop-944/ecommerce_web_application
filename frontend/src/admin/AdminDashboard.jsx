@@ -1,8 +1,18 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 
 const emptyForm = { name: "", price: "", category: "", stock: "", image: "" };
 const fallbackImage = "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80";
+
+async function request(url, options = {}) {
+  const response = await fetch(url, options);
+  const data = await response.json();
+  if (!response.ok) {
+    const error = new Error(data.message || "Request failed");
+    error.response = { status: response.status, data };
+    throw error;
+  }
+  return { data };
+}
 
 export default function AdminDashboard({ API, token, onLogout }) {
   const [products, setProducts] = useState([]);
@@ -44,8 +54,8 @@ export default function AdminDashboard({ API, token, onLogout }) {
   const load = async () => {
     try {
       const [productsResponse, ordersResponse] = await Promise.all([
-        axios.get(`${API}/products`),
-        axios.get(`${API}/orders`, { headers })
+        request(`${API}/products`),
+        request(`${API}/orders`, { headers })
       ]);
       setProducts(productsResponse.data);
       setOrders(ordersResponse.data);
@@ -81,8 +91,9 @@ export default function AdminDashboard({ API, token, onLogout }) {
     try {
       const wasEditing = Boolean(editingId);
       const payload = { ...form, price: Number(form.price), stock: Number(form.stock) };
-      if (editingId) await axios.put(`${API}/products/${editingId}`, payload, { headers });
-      else await axios.post(`${API}/products`, payload, { headers });
+      const requestOptions = { headers: { ...headers, "Content-Type": "application/json" }, body: JSON.stringify(payload) };
+      if (editingId) await request(`${API}/products/${editingId}`, { ...requestOptions, method: "PUT" });
+      else await request(`${API}/products`, { ...requestOptions, method: "POST" });
       setForm(emptyForm);
       setEditingId(null);
       setSuccess(wasEditing ? "Product updated successfully." : "Product added successfully.");
@@ -117,7 +128,7 @@ export default function AdminDashboard({ API, token, onLogout }) {
   const remove = async id => {
     if (!confirm("Delete this product?")) return;
     try {
-      await axios.delete(`${API}/products/${id}`, { headers });
+      await request(`${API}/products/${id}`, { method: "DELETE", headers });
       if (editingId === id) cancelEdit();
       await load();
     } catch (requestError) {
@@ -126,7 +137,7 @@ export default function AdminDashboard({ API, token, onLogout }) {
   };
 
   const updateOrderStatus = async (id, value) => {
-    await axios.patch(`${API}/orders/${id}/status`, { status: value }, { headers });
+    await request(`${API}/orders/${id}/status`, { method: "PATCH", headers: { ...headers, "Content-Type": "application/json" }, body: JSON.stringify({ status: value }) });
     await load();
   };
 
