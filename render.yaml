@@ -12,7 +12,7 @@ services:
       - key: JWT_SECRET
         generateValue: true
 
-  - type: static_site
+  - type: static
     name: ecommerce-admin
     rootDir: admin
     buildCommand: npm install && npm run build
