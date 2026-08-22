@@ -10,6 +10,7 @@ export default function AdminDashboard({ API, token, onLogout }) {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [saving, setSaving] = useState(false);
   const [productSearch, setProductSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
@@ -66,16 +67,25 @@ export default function AdminDashboard({ API, token, onLogout }) {
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
+  useEffect(() => {
+    if (!success) return undefined;
+    const timeout = window.setTimeout(() => setSuccess(""), 3000);
+    return () => window.clearTimeout(timeout);
+  }, [success]);
+
   const saveProduct = async event => {
     event.preventDefault();
     setError("");
+    setSuccess("");
     setSaving(true);
     try {
+      const wasEditing = Boolean(editingId);
       const payload = { ...form, price: Number(form.price), stock: Number(form.stock) };
       if (editingId) await axios.put(`${API}/products/${editingId}`, payload, { headers });
       else await axios.post(`${API}/products`, payload, { headers });
       setForm(emptyForm);
       setEditingId(null);
+      setSuccess(wasEditing ? "Product updated successfully." : "Product added successfully.");
       await load();
     } catch (requestError) {
       setError(requestError.response?.data?.message || "Could not save product");
@@ -94,12 +104,14 @@ export default function AdminDashboard({ API, token, onLogout }) {
       image: product.image || ""
     });
     setError("");
+    setSuccess("");
   };
 
   const cancelEdit = () => {
     setEditingId(null);
     setForm(emptyForm);
     setError("");
+    setSuccess("");
   };
 
   const remove = async id => {
@@ -146,6 +158,7 @@ export default function AdminDashboard({ API, token, onLogout }) {
     <input required min="0" step="1" type="number" placeholder="Stock" value={form.stock} onChange={event => setForm({ ...form, stock: event.target.value })} />
     <input type="url" placeholder="Image URL (https://...)" value={form.image} onChange={event => setForm({ ...form, image: event.target.value })} />
     {error && <div className="error">{error}</div>}
+    {success && <div className="success" role="status">{success}</div>}
     <div className="form-actions">
       <button disabled={saving}>{saving ? "Saving..." : editingId ? "Save Changes" : "Add Product"}</button>
       {editingId && <button type="button" className="secondary" onClick={cancelEdit}>Cancel</button>}
