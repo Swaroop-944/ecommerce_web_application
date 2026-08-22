@@ -4,7 +4,7 @@ import axios from "axios";
 import AdminDashboard from "../../frontend/src/admin/AdminDashboard";
 import "./styles.css";
 
-const API = import.meta.env.VITE_API_URL || "https://ecommerce-web-application-zjmw.onrender.com";
+const API = import.meta.env.VITE_API_URL || "https://ecommerce-web-application-zjmw.onrender.com/api";
 
 function Login({ onLogin }) {
   const [form, setForm] = useState({ email: "", password: "" });

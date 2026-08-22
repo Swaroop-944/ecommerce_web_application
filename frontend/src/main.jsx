@@ -8,7 +8,7 @@ const fallbackImage = "https://images.unsplash.com/photo-1523275335684-37898b6ba
 import "./admin.css";
 import AdminDashboard from "./admin/AdminDashboard";
 
-const API = import.meta.env.VITE_API_URL || "https://ecommerce-web-application-zjmw.onrender.com";
+const API = import.meta.env.VITE_API_URL || "https://ecommerce-web-application-zjmw.onrender.com/api";
 const StoreContext = createContext();
 
 function StoreProvider({ children }) {
